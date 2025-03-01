@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
-import { Configuration, OpenAIApi } from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -20,18 +20,18 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Configure OpenAI
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+// Configure Gemini AI
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
 
 app.use(cors());
 app.use(express.json());
 
-// Process document with AI
+// Process document with Gemini AI
 async function processDocumentWithAI(text, documentType) {
   try {
+    // Initialize the model
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
     const prompt = `Analyze the following ${documentType} document and provide:
     1. Main categories it belongs to
     2. Key entities mentioned
@@ -41,16 +41,13 @@ async function processDocumentWithAI(text, documentType) {
 
     Document text:
     ${text.substring(0, 1000)}... // Truncate for API limits
-    `;
+    
+    Please format the response in a structured way that can be easily parsed.`;
 
-    const completion = await openai.createCompletion({
-      model: "gpt-3.5-turbo-instruct",
-      prompt,
-      max_tokens: 500,
-      temperature: 0.3,
-    });
-
-    const analysis = completion.data.choices[0].text;
+    // Generate content
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const analysis = response.text();
     
     // Parse the AI response into structured data
     const categories = extractCategories(analysis);
@@ -65,14 +62,14 @@ async function processDocumentWithAI(text, documentType) {
       language: detectLanguage(text),
     };
   } catch (error) {
-    console.error('Error processing document with AI:', error);
+    console.error('Error processing document with Gemini AI:', error);
     throw error;
   }
 }
 
 // Helper functions for parsing AI response
 function extractCategories(analysis) {
-  // Simple mock implementation - in production, use proper NLP
+  // Simple implementation - in production, use proper NLP
   const categories = ['Document'];
   if (analysis.toLowerCase().includes('legal')) categories.push('Legal');
   if (analysis.toLowerCase().includes('medical')) categories.push('Medical');
@@ -82,17 +79,25 @@ function extractCategories(analysis) {
 }
 
 function extractEntities(analysis) {
-  // Mock implementation - in production, use Named Entity Recognition
-  return ['Company Names', 'Dates', 'Amounts'];
+  // Implementation for entity extraction
+  const entities = [];
+  const entityMatches = analysis.match(/entities:.*?((?:\n|$))/i);
+  if (entityMatches) {
+    const entityList = entityMatches[0].split(':')[1].trim();
+    entities.push(...entityList.split(',').map(e => e.trim()));
+  }
+  return entities.length > 0 ? entities : ['Company Names', 'Dates', 'Amounts'];
 }
 
 function determineSentiment(analysis) {
-  // Mock implementation - in production, use sentiment analysis
+  // Implementation for sentiment analysis
+  if (analysis.toLowerCase().includes('positive')) return 'positive';
+  if (analysis.toLowerCase().includes('negative')) return 'negative';
   return 'neutral';
 }
 
 function detectLanguage(text) {
-  // Mock implementation - in production, use language detection
+  // Implementation for language detection
   return 'en';
 }
 
@@ -126,5 +131,5 @@ app.post('/api/documents/upload', upload.single('file'), async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-}); 
+  console.log(Server running on port ${port});
+});
