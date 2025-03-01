@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased text-gray-900;
+  }
+}
+
+@layer components {
+  .prose {
+    @apply max-w-none;
+  }
+  
+  .prose p {
+    @apply mb-4;
+  }
+  
+  .prose h1, .prose h2, .prose h3, .prose h4 {
+    @apply font-bold mb-4;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 
+           transition-colors duration-200 flex items-center gap-2;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6;
+  }
+
+  .file-card {
+    @apply bg-white/90 backdrop-blur-sm p-5 rounded-xl
+    shadow-lg hover:shadow-xl transition-all duration-300
+    transform hover:-translate-y-1 border border-indigo-50;
+  }
+
+  .upload-zone {
+    @apply bg-white/80 backdrop-blur-sm border-2 border-dashed 
+    border-indigo-300 rounded-2xl p-8 text-center 
+    cursor-pointer transition-all duration-300 
+    hover:border-indigo-500 hover:bg-indigo-50/50;
+  }
+
+  .upload-text {
+    @apply text-gray-600 text-sm mt-3 font-medium;
+  }
+
+  .page-title {
+    @apply text-4xl font-bold text-gray-900;
+  }
+
+  .hero-pattern {
+    background-color: #f8fafc;
+    background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  @apply w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full;
+  animation: spin 1s linear infinite;
+}
+
+.glass-effect {
+  @apply bg-white/30 backdrop-blur-md border border-white/30;
+} 
